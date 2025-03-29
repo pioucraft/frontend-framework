@@ -25,6 +25,11 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.URL.Path == "/default.css" {
+		http.ServeFile(w, r, "default.css")
+		return
+	}
+
 	filePath := "src/app" + r.URL.Path + ".html"
 	htmlFile, err := os.ReadFile(filePath)
 	if err != nil {
@@ -32,7 +37,7 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	html := "<script src='/script.js'></script>" + strings.ReplaceAll(string(htmlAppFile), "{@app}", string(htmlFile))
+	html := "<script src='/script.js'></script><link rel='stylesheet' href='/default.css'></link>" + strings.ReplaceAll(string(htmlAppFile), "{@app}", string(htmlFile))
 
 	w.Header().Set("Content-Type", "text/html")
 	w.Write([]byte(html))

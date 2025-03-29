@@ -1,9 +1,18 @@
-<p>Hi <var>name</var></p>
-<p>Number: <var>number</var></p>
+<p>Number: <var>number.value</var></p>
+<var>number.value</var>
 <button onclick="increment()">Increment</button>
+<p>
+    <data type="if">
+        <data condition="number.value > 5"
+            >Your number is higher than <var>number.value - 1</var> ! It's
+            currently <var>number.value</var></data
+        >
+        <data condition="number.value > 3">Your number is higher than 3 !</data>
+        <data>Your number is too low ! <button>Be cool !</button></data>
+    </data>
+</p>
 
 <script>
-    const name = new dynamicVariable("name", "World");
     const number = new dynamicVariable("number", 0);
 
     function increment() {

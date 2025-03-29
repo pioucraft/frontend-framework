@@ -3,15 +3,16 @@ class dynamicVariable {
         this.name = name;
         this.value = value;
         this.UUID = uuidv4();
+        window.onload = () => {
+            const variables = document.getElementsByTagName("var");
+            Array.from(variables).forEach((variable) => {
+                variable.outerHTML = `<span js="${variable.innerHTML}" class="${
+                    this.UUID
+                } var">${eval(variable.innerHTML)}</span>`;
+            });
 
-        const variables = document.getElementsByTagName("var");
-        for (let i = 0; i < variables.length; i++) {
-            if (variables[i].innerHTML === `${this.name}`) {
-                variables[
-                    i
-                ].outerHTML = `<span class="${this.UUID}">${this.value}</span>`;
-            }
-        }
+            this.updateIfs();
+        };
     }
 
     set(newValue) {
@@ -20,7 +21,7 @@ class dynamicVariable {
     }
 
     updateDisplay() {
-        const displayElement = document.getElementsByClassName(this.UUID);
+        const displayElement = document.getElementsByClassName("var");
         if (displayElement.length > 0) {
             Array.from(displayElement).forEach((element) => {
                 element.innerHTML = this.value;
@@ -29,6 +30,33 @@ class dynamicVariable {
             console.error(
                 "Display elements not found for dynamic variable " + this.name
             );
+        }
+        this.updateIfs();
+    }
+
+    updateIfs() {
+        const datas = document.querySelectorAll("data[type=if]");
+        for (let i = 0; i < datas.length; i++) {
+            const data = datas[i];
+            this.updateIf(data);
+        }
+    }
+
+    updateIf(elements) {
+        const existingIfSpans = document.querySelectorAll(`.if-${this.UUID}`);
+        existingIfSpans.forEach((span) => span.remove());
+
+        for (let i = 0; i < elements.children.length; i++) {
+            const element = elements.children[i];
+            if (
+                eval((element.attributes.condition ?? { value: "true" }).value)
+            ) {
+                elements.parentElement.insertAdjacentHTML(
+                    "beforeend",
+                    `<span class="if-${this.UUID}">${element.innerHTML}</span>`
+                );
+                break;
+            }
         }
     }
 }
