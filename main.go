@@ -103,7 +103,6 @@ func returnHTML(w http.ResponseWriter, path string) {
 	}
 
 	for strings.Contains(string(htmlFile), "{@component}") {
-		fmt.Printf("Found component in %s\n", path)
 		index := strings.Index(string(htmlFile), "{@component}")
 		endIndex := strings.Index(string(htmlFile)[index:], "{/component}")
 		if endIndex == -1 {
@@ -112,7 +111,6 @@ func returnHTML(w http.ResponseWriter, path string) {
 		}
 		endIndex += index + len("{/component}")
 		componentPath := string(htmlFile)[index+len("{@component}") : endIndex-len("{/component}")]
-		fmt.Printf("Component path: %s\n", componentPath)
 		component, err := os.ReadFile(filepath.Join("src/components", componentPath+".html"))
 		if err != nil {
 			http.Error(w, "Component not found", http.StatusNotFound)
