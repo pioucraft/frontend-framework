@@ -30,6 +30,11 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.URL.Path == "/dist/purify.min.js" {
+		http.ServeFile(w, r, "dist/purify.min.js")
+		return
+	}
+
 	filePath := "src/app" + r.URL.Path + ".html"
 	htmlFile, err := os.ReadFile(filePath)
 	if err != nil {
@@ -37,7 +42,7 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	html := "<script src='/script.js'></script><link rel='stylesheet' href='/default.css'></link>" + strings.ReplaceAll(string(htmlAppFile), "{@app}", string(htmlFile))
+	html := "<script type='text/javascript' src='dist/purify.min.js'></script><script src='/script.js'></script><link rel='stylesheet' href='/default.css'></link>" + strings.ReplaceAll(string(htmlAppFile), "{@app}", string(htmlFile))
 
 	w.Header().Set("Content-Type", "text/html")
 	w.Write([]byte(html))

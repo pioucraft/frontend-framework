@@ -43,25 +43,21 @@
     element="level1"
 >
     <div>
-        <p>
-            Row:
-            <js-element type="js" update="theMatrix" js="level1"
-                >Row</js-element
-            >
-        </p>
         <div>
             <js-element
                 type="each"
                 update="theMatrix"
                 js="level1"
                 element="level2"
+                style="display: flex; flex-direction: row"
             >
-                <p>
-                    Element:
-                    <js-element type="js" update="theMatrix" js="level2"
-                        >Element</js-element
-                    >
-                </p>
+                <js-element type="js" update="theMatrix" js="level2"
+                    >Element</js-element
+                >
+                <js-element type="if" update="theMatrix" js="level2 != 5"
+                    >.</js-element
+                >
+                <js-element type="else" update="theMatrix">,</js-element>
             </js-element>
         </div>
     </div>

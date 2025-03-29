@@ -57,13 +57,15 @@ class dynamicVariable {
             `js-element[update~="${this.name}"][type="if"]`
         );
         Array.from(elements).forEach((element) => {
-            const condition = element.attributes.js.value;
-            if (eval(condition)) {
-                element.hidden = false;
-            } else {
-                element.hidden = true;
-                this.updateIfs(element);
-            }
+            try {
+                const condition = element.attributes.js.value;
+                if (eval(condition)) {
+                    element.hidden = false;
+                } else {
+                    element.hidden = true;
+                    this.updateIfs(element);
+                }
+            } catch (error) {}
         });
     }
 
@@ -85,6 +87,15 @@ class dynamicVariable {
         });
         Array.from(elements).forEach((element) => {
             element.innerHTML = eval(element.attributes.js.value);
+
+            // if (
+            //     (element.attributes.html ?? { value: "false" }).value == "true"
+            // ) {
+            //     element.innerHTML = eval(element.attributes.js.value);
+            // } else
+            //     element.innerHTML = DOMPurify.sanitize(
+            //         eval(element.attributes.js.value)
+            //     );
         });
     }
 
@@ -94,47 +105,57 @@ class dynamicVariable {
         );
         let updated = 0;
         while (updated < elements.length) {
-            const element = elements[0];
-            let uuid = element.getAttribute("uuid");
-            if (!uuid) {
-                uuid = uuidV4();
+            const element = elements[updated];
+
+            try {
+                let uuid = uuidV4();
                 element.setAttribute("uuid", uuid);
-            }
-            while (element.children.length > 1) {
-                element.removeChild(element.lastChild);
-            }
 
-            const loopList = eval(element.attributes.js.value);
-            loopsVariables[uuid] = loopList;
+                while (element.children.length > 1) {
+                    element.removeChild(element.lastChild);
+                }
 
-            const loopElement = element.firstElementChild;
-            if (loopElement) {
-                for (let i = 0; i < loopList.length; i++) {
-                    const clonedElement = loopElement.cloneNode(true);
-                    clonedElement.hidden = false;
-                    element.appendChild(clonedElement);
+                const loopList = eval(element.attributes.js.value);
+                loopsVariables[uuid] = loopList;
 
-                    const lastElement = element.lastElementChild;
-                    const allDescendants = lastElement.querySelectorAll("*");
-                    for (let k = 0; k < allDescendants.length; k++) {
-                        const descendant = allDescendants[k];
-                        if (descendant.attributes.js) {
-                            const jsValue = descendant.attributes.js.value;
-                            descendant.setAttribute(
-                                "js",
-                                `(function() { const ${element.attributes.element.value} = loopsVariables['${uuid}'][${i}]; return ${jsValue}})()`
-                            );
+                const loopElement = element.firstElementChild;
+                if (loopElement) {
+                    for (let i = 0; i < loopList.length; i++) {
+                        const clonedElement = loopElement.cloneNode(true);
+                        clonedElement.hidden = false;
+                        element.appendChild(clonedElement);
+
+                        const lastElement = element.lastElementChild;
+                        const allDescendants =
+                            lastElement.querySelectorAll("*");
+                        for (let k = 0; k < allDescendants.length; k++) {
+                            const descendant = allDescendants[k];
+                            if (descendant.attributes.js) {
+                                const jsValue = descendant.attributes.js.value;
+                                descendant.setAttribute(
+                                    "js",
+                                    `(function() { const ${element.attributes.element.value} = loopsVariables['${uuid}'][${i}]; return ${jsValue}})()`
+                                );
+                            }
                         }
                     }
+                } else {
+                    console.warn(
+                        "No child element found to clone in:",
+                        element
+                    );
                 }
-            } else {
-                console.warn("No child element found to clone in:", element);
-            }
+            } catch (error) {}
             elements = document.querySelectorAll(
                 `js-element[update~="${this.name}"][type="each"]`
             );
             updated++;
         }
+        Object.keys(loopsVariables).forEach((uuid) => {
+            if (!document.querySelector(`[uuid="${uuid}"]`)) {
+                delete loopsVariables[uuid];
+            }
+        });
     }
 }
 
@@ -155,7 +176,7 @@ class jsElement extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ["js", "update", "type", "uuid", "element"];
+        return ["js", "update", "type", "uuid", "element", "html"];
     }
 }
 
@@ -171,8 +192,11 @@ window.onload = function () {
 
     const eachElements = document.querySelectorAll("js-element[type='each']");
     eachElements.forEach((element) => {
-        if (element.firstElementChild) {
-            element.firstElementChild.hidden = true;
+        let span = document.createElement("span");
+        while (element.firstChild) {
+            span.appendChild(element.firstChild);
         }
+        span.hidden = true;
+        element.appendChild(span);
     });
 };
