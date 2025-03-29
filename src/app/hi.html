@@ -14,15 +14,32 @@
 </js-element>
 <js-element type="else" update="number">
     <p>
-        Number is not 5 nor 3, instead, it's
+        Number is neither 5 nor 3, instead, it's
         <js-element type="js" update="number" js="number.value"
             >Number</js-element
         >
     </p>
 </js-element>
 
+<js-element type="each" update="numbers" js="numbers.value">
+    <div>
+        <p>
+            Number is:
+            <js-element type="js" update="numbers" js="element"
+                >Number</js-element
+            >
+        </p>
+    </div>
+</js-element>
+
+<button onclick="numbers.set([...numbers.value, number.value])">
+    Add to numbers
+</button>
+
 <script>
     const number = new dynamicVariable("number", 0);
+    const numbers = new dynamicVariable("numbers", []);
+
     function increment() {
         number.set(number.value + 1);
     }
