@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -30,17 +31,58 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filePath := "src/app" + r.URL.Path + ".html"
-	htmlFile, err := os.ReadFile(filePath)
-	if err != nil {
-		http.Error(w, "File not found", http.StatusNotFound)
+	if r.URL.Path == "/" {
+		indexPath := filepath.Join("index.html")
+		returnHTML(w, indexPath)
 		return
 	}
+	rawPaths := strings.Split(r.URL.Path, "/")
+	paths := []string{}
+	for _, p := range rawPaths {
+		if p != "" {
+			paths = append(paths, p)
+		}
+	}
+	currentPath := ""
 
-	html := "<script src='/script.js'></script><link rel='stylesheet' href='/default.css'></link>" + strings.ReplaceAll(string(htmlAppFile), "{@app}", string(htmlFile))
+	for i, segment := range paths {
 
-	w.Header().Set("Content-Type", "text/html")
-	w.Write([]byte(html))
+		dirPath := filepath.Join("src/app", currentPath)
+		dir, err := os.ReadDir(dirPath)
+		if err != nil {
+			continue
+		}
+
+		found := false
+		for _, entry := range dir {
+			if entry.Name() == segment {
+				found = true
+				currentPath = filepath.Join(currentPath, entry.Name())
+				break
+			}
+		}
+		if !found {
+			for _, entry := range dir {
+				if entry.Name() == "[slug]" {
+					found = true
+					currentPath = filepath.Join(currentPath, "[slug]")
+					break
+				}
+			}
+		}
+		if !found {
+			http.Error(w, "File not found", http.StatusNotFound)
+			return
+		}
+
+		if i == len(paths)-1 {
+			path := filepath.Join(currentPath, "index.html")
+			returnHTML(w, path)
+			return
+		}
+
+	}
+
 }
 
 func main() {
@@ -51,4 +93,37 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func returnHTML(w http.ResponseWriter, path string) {
+	htmlFile, err := os.ReadFile(filepath.Join("src/app/", path))
+	if err != nil {
+		http.Error(w, "File not found", http.StatusNotFound)
+		return
+	}
+
+	for strings.Contains(string(htmlFile), "{@component}") {
+		fmt.Printf("Found component in %s\n", path)
+		index := strings.Index(string(htmlFile), "{@component}")
+		endIndex := strings.Index(string(htmlFile)[index:], "{/component}")
+		if endIndex == -1 {
+			http.Error(w, "Component not closed", http.StatusInternalServerError)
+			return
+		}
+		endIndex += index + len("{/component}")
+		componentPath := string(htmlFile)[index+len("{@component}") : endIndex-len("{/component}")]
+		fmt.Printf("Component path: %s\n", componentPath)
+		component, err := os.ReadFile(filepath.Join("src/components", componentPath+".html"))
+		if err != nil {
+			http.Error(w, "Component not found", http.StatusNotFound)
+			return
+		}
+		htmlFile = []byte(strings.Replace(string(htmlFile), "{@component}"+componentPath+"{/component}", string(component), 1))
+	}
+
+	html := "<script src='/script.js'></script><link rel='stylesheet' href='/default.css'></link>" +
+		strings.ReplaceAll(string(htmlAppFile), "{@app}", string(htmlFile))
+	w.Header().Set("Content-Type", "text/html")
+	w.Write([]byte(html))
+	return
 }
