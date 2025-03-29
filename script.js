@@ -89,10 +89,12 @@ class dynamicVariable {
     }
 
     updateLoops() {
-        const elements = document.querySelectorAll(
+        let elements = document.querySelectorAll(
             `js-element[update~="${this.name}"][type="each"]`
         );
-        Array.from(elements).forEach((element) => {
+        let updated = 0;
+        while (updated < elements.length) {
+            const element = elements[0];
             let uuid = element.getAttribute("uuid");
             if (!uuid) {
                 uuid = uuidV4();
@@ -106,7 +108,6 @@ class dynamicVariable {
             loopsVariables[uuid] = loopList;
 
             const loopElement = element.firstElementChild;
-
             if (loopElement) {
                 for (let i = 0; i < loopList.length; i++) {
                     const clonedElement = loopElement.cloneNode(true);
@@ -115,20 +116,25 @@ class dynamicVariable {
 
                     const lastElement = element.lastElementChild;
                     const allDescendants = lastElement.querySelectorAll("*");
-                    Array.from(allDescendants).forEach((descendant) => {
+                    for (let k = 0; k < allDescendants.length; k++) {
+                        const descendant = allDescendants[k];
                         if (descendant.attributes.js) {
                             const jsValue = descendant.attributes.js.value;
                             descendant.setAttribute(
                                 "js",
-                                `(function() { const element = loopsVariables['${uuid}'][${i}]; return ${jsValue}})()`
+                                `(function() { const ${element.attributes.element.value} = loopsVariables['${uuid}'][${i}]; return ${jsValue}})()`
                             );
                         }
-                    });
+                    }
                 }
             } else {
                 console.warn("No child element found to clone in:", element);
             }
-        });
+            elements = document.querySelectorAll(
+                `js-element[update~="${this.name}"][type="each"]`
+            );
+            updated++;
+        }
     }
 }
 
@@ -149,7 +155,7 @@ class jsElement extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ["js", "update", "type", "uuid"];
+        return ["js", "update", "type", "uuid", "element"];
     }
 }
 
