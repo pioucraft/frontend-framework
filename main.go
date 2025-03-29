@@ -20,6 +20,11 @@ func loader() {
 }
 
 func pageHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/script.js" {
+		http.ServeFile(w, r, "script.js")
+		return
+	}
+
 	filePath := "src/app" + r.URL.Path + ".html"
 	htmlFile, err := os.ReadFile(filePath)
 	if err != nil {
@@ -27,7 +32,7 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	html := strings.ReplaceAll(string(htmlAppFile), "{@app}", string(htmlFile))
+	html := "<script src='/script.js'></script>" + strings.ReplaceAll(string(htmlAppFile), "{@app}", string(htmlFile))
 
 	w.Header().Set("Content-Type", "text/html")
 	w.Write([]byte(html))
