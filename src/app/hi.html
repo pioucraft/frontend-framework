@@ -1,70 +1,58 @@
 <js-element
     js="(function() {if(number.value == 5) return 'GOOD'; else return number.value;})()"
     update="number"
-    type="js"
     >Number</js-element
 >
 <button onclick="increment()">Increment</button>
 
-<js-element type="if" update="number" js="number.value == 5">
+<if-element update="number" js="number.value == 5">
     <p>Number is 5</p>
-</js-element>
-<js-element type="elif" update="number" js="number.value == 3">
+</if-element>
+<elif-element update="number" js="number.value == 3">
     <p>Number is not 5 but 3</p>
-</js-element>
-<js-element type="else" update="number">
+</elif-element>
+<else-element update="number">
     <p>
         Number is neither 5 nor 3, instead, it's
-        <js-element type="js" update="number" js="number.value"
-            >Number</js-element
-        >
+        <js-element update="number" js="number.value">Number</js-element>
     </p>
-</js-element>
+</else-element>
 
-<js-element type="each" update="numbers" js="numbers.value" element="element">
+<each-element update="numbers" js="numbers.value" element="element">
     <div>
         <p>
             Number is:
-            <js-element type="js" update="numbers" js="element"
-                >Number</js-element
-            >
+            <js-element update="numbers" js="element">Number</js-element>
         </p>
     </div>
-</js-element>
+</each-element>
 
 <button onclick="numbers.set([...numbers.value, number.value])">
     Add to numbers
 </button>
 
-<js-element
-    type="each"
-    update="theMatrix"
-    js="theMatrix.value"
-    element="level1"
->
+<each-element update="theMatrix" js="theMatrix.value" element="level1">
     <div>
         <div>
-            <js-element
-                type="each"
+            <each-element
                 update="theMatrix"
                 js="level1"
                 element="level2"
                 style="display: flex; flex-direction: row"
             >
-                <js-element type="js" update="theMatrix" js="level2"
-                    >Element</js-element
-                >
-                <js-element type="if" update="theMatrix" js="level2 != 5"
-                    >.</js-element
-                >
-                <js-element type="else" update="theMatrix">,</js-element>
-            </js-element>
+                <js-element update="theMatrix" js="level2">Element</js-element>
+                <if-element update="theMatrix" js="level2 != 5">.</if-element>
+                <else-element update="theMatrix">,</else-element>
+            </each-element>
         </div>
     </div>
-</js-element>
+</each-element>
 <button onclick="theMatrix.set([...theMatrix.value, numbers.value])">
     Add to matrix
 </button>
+
+<js-element js="'<h1>Hi</h1>'" update="number" html="true">Hi !</js-element>
+
 <script>
     const number = new dynamicVariable("number", 0);
     const numbers = new dynamicVariable("numbers", []);

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -30,11 +31,6 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.URL.Path == "/dist/purify.min.js" {
-		http.ServeFile(w, r, "dist/purify.min.js")
-		return
-	}
-
 	filePath := "src/app" + r.URL.Path + ".html"
 	htmlFile, err := os.ReadFile(filePath)
 	if err != nil {
@@ -42,14 +38,43 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	html := "<script type='text/javascript' src='dist/purify.min.js'></script><script src='/script.js'></script><link rel='stylesheet' href='/default.css'></link>" + strings.ReplaceAll(string(htmlAppFile), "{@app}", string(htmlFile))
+	html := "<script src='/script.js'></script><link rel='stylesheet' href='/default.css'></link>" + strings.ReplaceAll(string(htmlAppFile), "{@app}", string(htmlFile))
 
 	w.Header().Set("Content-Type", "text/html")
 	w.Write([]byte(html))
 }
 
+func mapFolderStructure(root string) map[string]string {
+	structure := make(map[string]string)
+
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Printf("Error accessing path %s: %v", path, err)
+			return err
+		}
+		if info.IsDir() {
+			structure[path] = "directory"
+		} else {
+			structure[path] = "file"
+		}
+		return nil
+	})
+	if err != nil {
+		log.Fatalf("Error walking the path %s: %v", root, err)
+	}
+
+	return structure
+}
+
 func main() {
 	loader()
+
+	// Example usage of mapFolderStructure
+	fmt.Println("Mapping folder structure of 'src/app':")
+	folderStructure := mapFolderStructure("src/app")
+	for path, fileType := range folderStructure {
+		fmt.Printf("%s: %s\n", path, fileType)
+	}
 
 	http.HandleFunc("/", pageHandler)
 	fmt.Println("Server starting on port 8080...")

@@ -26,7 +26,7 @@ class dynamicVariable {
 
     resetIfs() {
         const elements = document.querySelectorAll(
-            `js-element[update~="${this.name}"][type="if"]:not([hidden]), js-element[update~="${this.name}"][type="elif"]:not([hidden]), js-element[update~="${this.name}"][type="else"]:not([hidden])`
+            `if-element[update~="${this.name}"]:not([hidden]), elif-element[update~="${this.name}"]:not([hidden]), else-element[update~="${this.name}"]:not([hidden])`
         );
         Array.from(elements).forEach((element) => {
             element.hidden = true;
@@ -36,9 +36,9 @@ class dynamicVariable {
     updateIfs(from) {
         if (from) {
             const nextElement = from.nextElementSibling;
-            if (nextElement && nextElement.attributes.type) {
-                const type = nextElement.attributes.type.value;
-                if (type === "elif") {
+            if (nextElement) {
+                const type = nextElement.tagName;
+                if (type === "elif-element") {
                     const condition = nextElement.attributes.js.value;
                     if (eval(condition)) {
                         nextElement.hidden = false;
@@ -46,7 +46,7 @@ class dynamicVariable {
                         nextElement.hidden = true;
                         this.updateIfs(nextElement);
                     }
-                } else if (type === "else") {
+                } else if (type === "else-element") {
                     nextElement.hidden = false;
                 }
             }
@@ -54,7 +54,7 @@ class dynamicVariable {
         }
 
         const elements = document.querySelectorAll(
-            `js-element[update~="${this.name}"][type="if"]`
+            `if-element[update~="${this.name}"]`
         );
         Array.from(elements).forEach((element) => {
             try {
@@ -72,13 +72,12 @@ class dynamicVariable {
     updateJS() {
         const elements = Array.from(
             document.querySelectorAll(
-                `js-element[update~="${this.name}"]:not([type]):not([hidden]), js-element[update~="${this.name}"][type="js"]:not([hidden])`
+                `js-element[update~="${this.name}"]:not([hidden])`
             )
         ).filter((element) => {
             let parent = element.parentElement;
             while (parent) {
-                const style = window.getComputedStyle(parent);
-                if (style.display === "none" || style.visibility === "hidden") {
+                if (parent.hidden) {
                     return false; // Exclude elements with hidden parents
                 }
                 parent = parent.parentElement;
@@ -86,22 +85,17 @@ class dynamicVariable {
             return true; // Include elements with no hidden parents
         });
         Array.from(elements).forEach((element) => {
-            element.innerHTML = eval(element.attributes.js.value);
-
-            // if (
-            //     (element.attributes.html ?? { value: "false" }).value == "true"
-            // ) {
-            //     element.innerHTML = eval(element.attributes.js.value);
-            // } else
-            //     element.innerHTML = DOMPurify.sanitize(
-            //         eval(element.attributes.js.value)
-            //     );
+            if (
+                (element.attributes.html ?? { value: "false" }).value == "true"
+            ) {
+                element.innerHTML = eval(element.attributes.js.value);
+            } else element.textContent = eval(element.attributes.js.value);
         });
     }
 
     updateLoops() {
         let elements = document.querySelectorAll(
-            `js-element[update~="${this.name}"][type="each"]`
+            `each-element[update~="${this.name}"]`
         );
         let updated = 0;
         while (updated < elements.length) {
@@ -147,7 +141,7 @@ class dynamicVariable {
                 }
             } catch (error) {}
             elements = document.querySelectorAll(
-                `js-element[update~="${this.name}"][type="each"]`
+                `each-element[update~="${this.name}"]`
             );
             updated++;
         }
@@ -176,21 +170,69 @@ class jsElement extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ["js", "update", "type", "uuid", "element", "html"];
+        return ["js", "update", "html"];
     }
 }
 
 customElements.define("js-element", jsElement);
 
+class ifElement extends HTMLElement {
+    constructor() {
+        super();
+    }
+
+    static get observedAttributes() {
+        return ["js", "update"];
+    }
+}
+
+customElements.define("if-element", ifElement);
+
+class elifElement extends HTMLElement {
+    constructor() {
+        super();
+    }
+
+    static get observedAttributes() {
+        return ["js"];
+    }
+}
+
+customElements.define("elif-element", elifElement);
+
+class elseElement extends HTMLElement {
+    constructor() {
+        super();
+    }
+
+    static get observedAttributes() {
+        return ["update"];
+    }
+}
+
+customElements.define("else-element", elseElement);
+
+class eachElement extends HTMLElement {
+    constructor() {
+        super();
+    }
+
+    static get observedAttributes() {
+        return ["js", "update", "uuid", "element"];
+    }
+}
+
+customElements.define("each-element", eachElement);
+
 window.onload = function () {
     const typeElements = document.querySelectorAll(
-        "js-element[type='if'], js-element[type='elif'], js-element[type='else']"
+        "if-element, elif-element, else-element"
     );
     typeElements.forEach((element) => {
         element.hidden = true;
     });
 
-    const eachElements = document.querySelectorAll("js-element[type='each']");
+    const eachElements = document.querySelectorAll("each-element");
     eachElements.forEach((element) => {
         let span = document.createElement("span");
         while (element.firstChild) {
