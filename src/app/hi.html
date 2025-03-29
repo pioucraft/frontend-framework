@@ -1,20 +1,28 @@
-<p>Number: <var>number.value</var></p>
-<var>number.value</var>
+<js-element
+    js="(function() {if(number.value == 5) return 'GOOD'; else return number.value;})()"
+    update="number"
+    type="js"
+    >Number</js-element
+>
 <button onclick="increment()">Increment</button>
-<p>
-    <data type="if">
-        <data condition="number.value > 5"
-            >Your number is higher than <var>number.value - 1</var> ! It's
-            currently <var>number.value</var></data
+
+<js-element type="if" update="number" js="number.value == 5">
+    <p>Number is 5</p>
+</js-element>
+<js-element type="elif" update="number" js="number.value == 3">
+    <p>Number is not 5 but 3</p>
+</js-element>
+<js-element type="else" update="number">
+    <p>
+        Number is not 5 nor 3, instead, it's
+        <js-element type="js" update="number" js="number.value"
+            >Number</js-element
         >
-        <data condition="number.value > 3">Your number is higher than 3 !</data>
-        <data>Your number is too low ! <button>Be cool !</button></data>
-    </data>
-</p>
+    </p>
+</js-element>
 
 <script>
     const number = new dynamicVariable("number", 0);
-
     function increment() {
         number.set(number.value + 1);
     }
