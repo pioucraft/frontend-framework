@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"framework/api"
 	"log"
 	"net/http"
 	"os"
@@ -21,6 +22,11 @@ func loader() {
 }
 
 func pageHandler(w http.ResponseWriter, r *http.Request) {
+	if strings.HasPrefix(r.URL.Path, "/api") {
+		api.API(w, r)
+		return
+	}
+
 	if r.URL.Path == "/script.js" {
 		http.ServeFile(w, r, "script.js")
 		return
