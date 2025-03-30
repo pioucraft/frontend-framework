@@ -71,7 +71,7 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		if !found {
-			http.Error(w, "File not found", http.StatusNotFound)
+			tryToGetStaticFile(w, r)
 			return
 		}
 
@@ -124,4 +124,14 @@ func returnHTML(w http.ResponseWriter, path string) {
 	w.Header().Set("Content-Type", "text/html")
 	w.Write([]byte(html))
 	return
+}
+
+func tryToGetStaticFile(w http.ResponseWriter, r *http.Request) {
+	path := strings.TrimPrefix(r.URL.Path, "/")
+	filePath := filepath.Join("src/static", path)
+
+	{
+		http.ServeFile(w, r, filePath)
+		return
+	}
 }
