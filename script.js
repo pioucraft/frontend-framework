@@ -262,13 +262,14 @@ const typeElements = document.querySelectorAll(
 typeElements.forEach((element) => {
     element.hidden = true;
 });
-
-const eachElements = document.querySelectorAll("each-element");
-eachElements.forEach((element) => {
-    let span = document.createElement("span");
-    while (element.firstChild) {
-        span.appendChild(element.firstChild);
-    }
-    span.hidden = true;
-    element.appendChild(span);
+window.addEventListener("load", () => {
+    const eachElements = document.querySelectorAll("each-element");
+    eachElements.forEach((element) => {
+        let span = document.createElement("span");
+        while (element.firstChild) {
+            span.appendChild(element.firstChild);
+        }
+        span.hidden = true;
+        element.appendChild(span);
+    });
 });
