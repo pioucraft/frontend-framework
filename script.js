@@ -1,13 +1,12 @@
 var loopsVariables = {};
+var onMount = [];
 
 class dynamicVariable {
     constructor(name, value) {
         this.name = name;
         this.value = value;
-
-        setTimeout(() => {
-            this.updateDisplay();
-        }, 0);
+        console.log("new dynamicVariable", name, value);
+        onMount.push(this.updateDisplay.bind(this));
     }
 
     set(value) {
@@ -20,6 +19,7 @@ class dynamicVariable {
     }
 
     updateDisplay() {
+        console.log("updateDisplay", this.name, this.value);
         this.resetIfs();
 
         var elements = document.querySelectorAll(`[update~="${this.name}"]`);
@@ -257,6 +257,7 @@ class eachElement extends HTMLElement {
 customElements.define("each-element", eachElement);
 
 window.addEventListener("load", () => {
+    console.log("load");
     const typeElements = document.querySelectorAll(
         "if-element, elif-element, else-element"
     );
@@ -272,4 +273,9 @@ window.addEventListener("load", () => {
         span.hidden = true;
         element.appendChild(span);
     });
+    setTimeout(() => {
+        onMount.forEach((element) => {
+            element();
+        });
+    }, 0);
 });
