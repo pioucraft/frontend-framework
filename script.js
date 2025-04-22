@@ -5,7 +5,6 @@ class dynamicVariable {
     constructor(name, value) {
         this.name = name;
         this.value = value;
-        console.log("new dynamicVariable", name, value);
         onMount.push(this.updateDisplay.bind(this));
     }
 
@@ -19,7 +18,6 @@ class dynamicVariable {
     }
 
     updateDisplay() {
-        console.log("updateDisplay", this.name, this.value);
         this.resetIfs();
 
         var elements = document.querySelectorAll(`[update~="${this.name}"]`);
