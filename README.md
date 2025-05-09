@@ -1,4 +1,5 @@
-# Full-stack Go framework for building web applications
+# Velox - a full stack Go web framework
+> [From Proto-Indo-European *h₂weh₁-lo- (“wind”), from *h₂weh₁- (“to blow”), named after the speed of wind.](https://en.wiktionary.org/wiki/velox)
 
 ## Features
 - [ ] The same features that you would expect from a traditional JavaScript framework like Next.js, or SvelteKit
