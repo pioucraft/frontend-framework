@@ -1,5 +1,4 @@
-# Velox - a full stack Go web framework
-> [Velox](https://en.wiktionary.org/wiki/velox) - swift, quick, fleet, rapid, speedy 
+# {insert name} - A full-stack Go framework for building web applications
 
 ## Features
 - [ ] The same features that you would expect from a traditional JavaScript framework like Next.js, or SvelteKit
