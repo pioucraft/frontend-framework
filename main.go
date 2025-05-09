@@ -20,6 +20,8 @@ func main() {
 }
 
 func pageHandler(w http.ResponseWriter, r *http.Request) {
-
+	// Try to get the page from app/web
+	path := "./app/web" + r.URL.Path
+	http.ServeFile(w, r, path)
 }
 
