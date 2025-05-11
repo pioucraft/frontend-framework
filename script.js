@@ -264,15 +264,12 @@ window.addEventListener("load", () => {
     });
     const eachElements = document.querySelectorAll("each-element");
     eachElements.forEach((element) => {
-
-        if(element.children.length > 1) {
-            let span = document.createElement("span");
-            while (element.firstChild) {
-                span.appendChild(element.firstChild);
-            }
-            element.appendChild(span);
+        let span = document.createElement("span");
+        while (element.firstChild) {
+            span.appendChild(element.firstChild);
         }
-        element.hidden = true;
+        span.hidden = true;
+        element.appendChild(span);
     });
     setTimeout(() => {
         onMount.forEach((element) => {
@@ -281,3 +278,5 @@ window.addEventListener("load", () => {
     }, 0);
 });
 
+
+// SOOOOO. Here, we've got things that we would like to separate from the rest of the code. We could put it in a new file, but because we didn't for the rest of the code, we're not going to do it here either.
