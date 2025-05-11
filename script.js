@@ -271,18 +271,6 @@ window.addEventListener("load", () => {
         span.hidden = true;
         element.appendChild(span);
     });
-    const jsElements = document.querySelectorAll("js-element");
-    const allElements = [...typeElements, ...eachElements, ...jsElements];
-    // for every element, add a data-uuid attribute and to their imediate childre, add a data-parent-attribute (the same UUID as their parent)
-    allElements.forEach((element) => {
-        const uuid = uuidV4();
-        element.setAttribute("data-uuid", uuid);
-        const children = element.children;
-        for (let i = 0; i < children.length; i++) {
-            const child = children[i];
-            child.setAttribute("data-parent-uuid", uuid);
-        }
-    });
     setTimeout(() => {
         onMount.forEach((element) => {
             element();
