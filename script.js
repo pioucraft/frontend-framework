@@ -278,5 +278,3 @@ window.addEventListener("load", () => {
     }, 0);
 });
 
-
-// SOOOOO. Here, we've got things that we would like to separate from the rest of the code. We could put it in a new file, but because we didn't for the rest of the code, we're not going to do it here either.
